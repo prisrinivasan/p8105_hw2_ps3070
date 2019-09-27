@@ -1,0 +1,67 @@
+---
+title: "p8105_hw2_ps3070"
+output: github_document
+---
+
+First, I will load the `tidyverse` and `readxl` libraries.
+
+```{r setup, message=FALSE}
+
+library(tidyverse)
+library(readxl)
+```
+
+## PROBLEM 1
+
+To read and clean the Mr. Trash Wheel .xlsx file, I will:
+* import the data
+* specify the sheet in the Excel file
+* omit non-data entries
+* use reasonable variable names
+* omit rows that do not include dumpster-specific data
+* round the number of sports balls to the nearest integer and converts the result to an integer variable (using `as.integer`)
+
+```{r import trash wheel, message=FALSE}
+data_trashwheel = read_excel(
+  "./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+  sheet = "Mr. Trash Wheel",
+  range = "A2:N338") %>%
+  janitor::clean_names() %>% 
+  drop_na(dumpster) %>% 
+  mutate(sports_balls = as.integer(round(sports_balls, digits = 0)))
+```
+
+Only cells from A2 to N338 are imported because column O contains notes and row 1 only contains a figure and no data.
+
+To clean up names of the data to snake case, I used `janitor::clean_names()`.
+
+The grand totals are included within the dataset. To omit rows that are dumpster-specific, I omitted rows that included these grand totals. Under the row `dumpster`, I dropped any rows that were recorded as `NA`/without data.
+
+
+# Reading and Cleaning precipitation data
+
+The 2018 precipitation data has empty rows, so I used `na.omit()` to avoid saving those rows.
+
+```{r}
+data_precip_2017 = read_excel(
+  "./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+  sheet = 4,
+  range = "A2:B14") %>% 
+  janitor::clean_names() %>% 
+  mutate(year = 2017)
+
+data_precip_2018 = read_excel(
+  "./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+  sheet = 3,
+  range = "A2:B14") %>% 
+  janitor::clean_names() %>% 
+  mutate(year = 2018) %>% 
+  na.omit(total)
+
+data_precip = bind_rows(data_precip_2017, data_precip_2018) %>% 
+  janitor::clean_names() %>% 
+  rename(precip_in = total) %>%
+  mutate(month = month.name[month])
+```
+
+
