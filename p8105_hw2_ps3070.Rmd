@@ -22,7 +22,7 @@ To read and clean the Mr. Trash Wheel .xlsx file, I will:
 * round the number of sports balls to the nearest integer and converts the result to an integer variable (using `as.integer`)
 
 ```{r import trash wheel, message=FALSE}
-data_trashwheel = read_excel(
+trashwheel = read_excel(
   "./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
   sheet = "Mr. Trash Wheel",
   range = "A2:N338") %>%
@@ -43,14 +43,14 @@ The grand totals are included within the dataset. To omit rows that are dumpster
 The 2018 precipitation data has empty rows, so I used `na.omit()` to avoid saving those rows.
 
 ```{r}
-data_precip_2017 = read_excel(
+precip_2017 = read_excel(
   "./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
   sheet = 4,
   range = "A2:B14") %>% 
   janitor::clean_names() %>% 
   mutate(year = 2017)
 
-data_precip_2018 = read_excel(
+precip_2018 = read_excel(
   "./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
   sheet = 3,
   range = "A2:B14") %>% 
@@ -58,7 +58,7 @@ data_precip_2018 = read_excel(
   mutate(year = 2018) %>% 
   na.omit(total)
 
-data_precip = bind_rows(data_precip_2017, data_precip_2018) %>% 
+precip = bind_rows(precip_2017, precip_2018) %>% 
   janitor::clean_names() %>% 
   rename(precip_in = total) %>%
   mutate(month = month.name[month])
@@ -75,7 +75,7 @@ While importing `pols-month.csv`, I will clean it by doing the following:
 Columns `prez_gop` and `prez_dem` are removed and consolidated into the column `president`. A column `name` was created to indicate `prez_gop` or `prez_dem`, but it was removed as well because `president` already indicates `0` for `gop` and `1` for `dem`.
 
 ```{r clean pols, message = FALSE}
-data_pols = read_csv(file = 
+pols = read_csv(file = 
   "./data/pols-month.csv") %>% 
   separate(mon, c("year", "month", "day"), convert = TRUE) %>% 
   mutate(month = month.name[month]) %>% 
@@ -89,7 +89,7 @@ data_pols = read_csv(file =
 Next, I will import and clean `snp.csv` using similar guidelines.
 
 ```{r clean snp, message = FALSE}
-data_snp = read_csv(file = 
+snp = read_csv(file = 
   "./data/snp.csv") %>% 
   separate(date, c("day", "month", "year"), convert = TRUE) %>% 
   mutate(month = month.name[month]) %>% 
@@ -102,5 +102,30 @@ data_snp = read_csv(file =
 Next, I will import and tidy the unemployment data.
 
 
+```{r clean unemployment, message = FALSE}
+unemp = read_csv(file = 
+  "./data/unemployment.csv") %>% 
+  pivot_longer(cols = Jan:Dec,
+               names_to = "month",
+               values_to = "rate_unemployed") %>% 
+    mutate(month = month.name[match(month, month.abb)]) %>% 
+    janitor::clean_names() %>%
+    arrange(year, month) %>%
+    select(year, month, everything())
+```
 
+Next, I will fully join the datasets by merging `snp` into `pols` and merging `unemployment` into the result. I also chose to organize it so that `year`, `month`, and `president` appear before other variables.
+
+```{r merge datasets, message = FALSE}
+pols_snp_unemp =
+  full_join(full_join(pols, snp, by = c("year", "month")), unemp, by = c("year", "month")) %>% 
+  select(year, month, president, everything())
+```
+
+
+##Insert paragraph here!!!
+
+#Date format?
+
+## PROBLEM 3
 
