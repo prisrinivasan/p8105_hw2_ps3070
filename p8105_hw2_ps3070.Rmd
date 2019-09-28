@@ -129,3 +129,39 @@ pols_snp_unemp =
 
 ## PROBLEM 3
 
+First, I will load and tidy the data with the following in mind:
+* names of a categorical predictor and the case structure of string variables changed over time
+* some rows seem duplicated, so I removed using `distinct()`
+
+I removed duplicates first, because it was hard to tell whether counts within other corresponding values of ethnicity (i.e. `BLACK NON HISP` vs `BLACK NON HISPANIC`) were overlapping counts or separate counts. Thus, I removed duplicates before recoding corresponding values as the same value.
+
+```{r}
+baby = read_csv(file = 
+  "./data/Popular_Baby_Names.csv") %>% 
+  janitor::clean_names() %>% 
+  distinct(.keep_all = FALSE) %>% 
+  mutate(
+    ethnicity = str_to_lower(ethnicity),
+    gender = str_to_lower(gender),
+    childs_first_name = str_to_lower(childs_first_name),
+    ethnicity = replace(ethnicity, ethnicity ==  "asian and paci", "asian and pacific islander"),
+    ethnicity = replace(ethnicity, ethnicity ==  "black non hisp", "black non hispanic"),
+    ethnicity = replace(ethnicity, ethnicity ==  "white non hisp", "white non hispanic")
+    ) %>% 
+  group_by(ethnicity) %>% 
+  mutate(
+    new_rank = rank(count)
+  ) %>% 
+  select(-rank) %>% 
+  
+```
+
+```{r}
+  pivot_longer(starts_with("prez"),
+               values_to = "president") %>% 
+  select(-day, -name) %>% 
+  arrange(year, month) %>% 
+  select(year, month, everything())
+```
+
+The column `rank` was initially populated based on count within each `ethnicity` category. However, some ethnicity values are named differently and were combined above. Because of this, a new rank column was created to show total rankings within each category.
