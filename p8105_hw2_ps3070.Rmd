@@ -64,4 +64,43 @@ data_precip = bind_rows(data_precip_2017, data_precip_2018) %>%
   mutate(month = month.name[month])
 ```
 
+## PROBLEM 2
+
+While importing `pols-month.csv`, I will clean it by doing the following:
+* separate `mon` into day, month, and year
+* replace month number with month name
+* create a `president` variable taking the values of `prez_gop` and `prez_dem`
+* remove `prez_gop`, `prez_dem`, and `day`
+
+Columns `prez_gop` and `prez_dem` are removed and consolidated into the column `president`. A column `name` was created to indicate `prez_gop` or `prez_dem`, but it was removed as well because `president` already indicates `0` for `gop` and `1` for `dem`.
+
+```{r clean pols, message = FALSE}
+data_pols = read_csv(file = 
+  "./data/pols-month.csv") %>% 
+  separate(mon, c("year", "month", "day"), convert = TRUE) %>% 
+  mutate(month = month.name[month]) %>% 
+  pivot_longer(starts_with("prez"),
+               values_to = "president") %>% 
+  select(-day, -name) %>% 
+  arrange(year, month) %>% 
+  select(year, month, everything())
+```
+
+Next, I will import and clean `snp.csv` using similar guidelines.
+
+```{r clean snp, message = FALSE}
+data_snp = read_csv(file = 
+  "./data/snp.csv") %>% 
+  separate(date, c("day", "month", "year"), convert = TRUE) %>% 
+  mutate(month = month.name[month]) %>% 
+  select(-day) %>% 
+  arrange(year, month) %>% 
+  select(year, month, everything())
+```
+
+
+Next, I will import and tidy the unemployment data.
+
+
+
 
