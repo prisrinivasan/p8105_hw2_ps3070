@@ -162,6 +162,8 @@ baby_names_olivia =
 knitr::kable(baby_names_olivia, format = "html", caption = "Popularity of Olivia as a Female Baby Name")
 ```
 
+Insert text
+
 
 ```{r male baby names, message = FALSE}
 baby_names_male =
@@ -176,7 +178,9 @@ knitr::kable(baby_names_male, format = "html", caption = "Most Popular Male Baby
 ```
 
 
-```{r scatterplots}
+Insert text
+
+```{r scatterplots, message = FALSE}
 scatter_male =
   baby_names %>% 
   filter(gender == "male",
