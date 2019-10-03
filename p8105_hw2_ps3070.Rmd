@@ -72,7 +72,7 @@ While importing `pols-month.csv`, I will clean it by doing the following:
   * create a `president` variable taking the values of `prez_gop` and `prez_dem`
   * remove `prez_gop`, `prez_dem`, and `day`
 
-Columns `prez_gop` and `prez_dem` are removed and consolidated into the column `president`. A column `name` was created to indicate `prez_gop` or `prez_dem`, but it was removed as well because `president` already indicates `0` for `gop` and `1` for `dem`.
+Columns `prez_gop` and `prez_dem` are removed and consolidated into the column `president`. A column `name` was created to indicate `prez_gop` or `prez_dem`, but it was removed as well because `president` already indicates `gop` and `dem`.
 
 ```{r clean pols, message = FALSE, warning = FALSE}
 pols = read_csv(file = 
@@ -95,7 +95,7 @@ Below, I will import and clean `snp.csv` using similar guidelines.
 ```{r clean snp, message = FALSE, warning = FALSE}
 snp = read_csv(file = 
   "./data/snp.csv") %>% 
-  separate(date, c("day", "month", "year"), convert = TRUE) %>% 
+  separate(date, c("month", "day", "year"), convert = TRUE) %>% 
   mutate(month = month.name[month]) %>% 
   arrange(year, month) %>% 
   select(-day) %>% 
