@@ -187,10 +187,12 @@ scatter_male =
          ethnicity == "white non hispanic",
          year_of_birth == "2016") %>% 
   ggplot(aes(x = rank, y = count)) +
-  geom_point(aes(color = name)) + 
+  geom_point() + 
   labs(
     title = "Rank in Popularity of Male White Non-Hispanic Children Born in 2016",
     x = "Rank",
     y = "Count"
   )
+
+print(scatter_male)
 ```
