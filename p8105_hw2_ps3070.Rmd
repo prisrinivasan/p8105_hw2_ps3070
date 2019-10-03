@@ -14,12 +14,13 @@ library(readxl)
 ## PROBLEM 1
 
 To read and clean the Mr. Trash Wheel .xlsx file, I will:
-* import the data
-* specify the sheet in the Excel file
-* omit non-data entries
-* use reasonable variable names
-* omit rows that do not include dumpster-specific data
-* round the number of sports balls to the nearest integer and converts the result to an integer variable (using `as.integer`)
+
+  * import the data
+  * specify the sheet in the Excel file
+  * omit non-data entries
+  * use reasonable variable names
+  * omit rows that do not include dumpster-specific data
+  * round the number of sports balls to the nearest integer and converts the result to an integer variable (using `as.integer`)
 
 ```{r import trash wheel, message=FALSE}
 trashwheel = read_excel(
@@ -67,10 +68,11 @@ precip = bind_rows(precip_2017, precip_2018) %>%
 ## PROBLEM 2
 
 While importing `pols-month.csv`, I will clean it by doing the following:
-* separate `mon` into day, month, and year
-* replace month number with month name
-* create a `president` variable taking the values of `prez_gop` and `prez_dem`
-* remove `prez_gop`, `prez_dem`, and `day`
+
+  * separate `mon` into day, month, and year
+  * replace month number with month name
+  * create a `president` variable taking the values of `prez_gop` and `prez_dem`
+  * remove `prez_gop`, `prez_dem`, and `day`
 
 Columns `prez_gop` and `prez_dem` are removed and consolidated into the column `president`. A column `name` was created to indicate `prez_gop` or `prez_dem`, but it was removed as well because `president` already indicates `0` for `gop` and `1` for `dem`.
 
@@ -130,8 +132,9 @@ pols_snp_unemp =
 ## PROBLEM 3
 
 First, I will load and tidy the data with the following in mind:
-* names of a categorical predictor and the case structure of string variables changed over time
-* some rows seem duplicated, so I removed using `distinct()`
+
+  * names of a categorical predictor and the case structure of string variables changed over time
+  * some rows seem duplicated, so I removed using `distinct()`
 
 I removed duplicates first, because it was hard to tell whether counts within other corresponding values of ethnicity (i.e. `BLACK NON HISP` vs `BLACK NON HISPANIC`) were overlapping counts or separate counts. Thus, I removed duplicates before recoding corresponding values as the same value.
 
@@ -158,7 +161,6 @@ baby_names_olivia =
 
 knitr::kable(baby_names_olivia, format = "html", caption = "Popularity of Olivia as a Female Baby Name")
 ```
-
 
 
 ```{r male baby names, message = FALSE}
