@@ -34,14 +34,9 @@ trashwheel = read_excel(
 
 Only cells from A2 to N408 are imported because column O contains notes and row 1 only contains a figure and no data.
 
-To clean up names of the data to snake case, I used `janitor::clean_names()`.
+To clean up names of the data to snake case, I used `janitor::clean_names()`. The grand totals are included within the dataset. To omit rows that are not dumpster-specific, I omitted rows that included these grand totals. Under the row `dumpster`, I dropped any rows that were recorded as `NA` so that the grand total rows would be removed. 
 
-The grand totals are included within the dataset. To omit rows that are dumpster-specific, I omitted rows that included these grand totals. Under the row `dumpster`, I dropped any rows that were recorded as `NA`/without data.
-
-
-# Reading and Cleaning precipitation data
-
-The 2018 precipitation data has empty rows, so I used `na.omit()` to avoid saving those rows.
+Next, I will read and clean the precipitation data, joining datasets for years 2017 and 2018. It should be noted that the 2018 precipitation data has empty rows, so I used `na.omit()` to avoid saving those rows.
 
 ```{r}
 precip_2017 = read_excel(
@@ -65,7 +60,10 @@ precip = bind_rows(precip_2017, precip_2018) %>%
   mutate(month = month.name[month])
 ```
 
-## PROBLEM 2
+The Mr. Trash Wheel dataset contains several variables describing weight of dumpsters, content, and volume in a total of `r nrow(trashwheel)` rows (number of observations). Key variables include weight in tons, volume in cubic yards, contents (like plastic bottles, cigarette butts, and grocery bags), and homes powered from the waste-to-energy plant that uses the trash for electricity. Total precipitation in 2018 is `r sum(pull(precip_2018, total))` inches, and `r sum(pull(precip_2017, total))` inches in 2017. The median number of sports balls collected in 2017 was `r median(pull(filter(trashwheel, year == 2017), sports_balls))`.
+
+
+## PROBLEM 2 
 
 While importing `pols-month.csv`, I will clean it by doing the following:
 
@@ -88,7 +86,7 @@ pols = read_csv(file =
   select(year, month, everything())
 ```
 
-Next, I will import and clean `snp.csv` using similar guidelines.
+Below, I will import and clean `snp.csv` using similar guidelines.
 
 ```{r clean snp, message = FALSE}
 snp = read_csv(file = 
@@ -100,9 +98,7 @@ snp = read_csv(file =
   select(year, month, everything())
 ```
 
-
-Next, I will import and tidy the unemployment data.
-
+Now I will import and tidy the unemployment data.
 
 ```{r clean unemployment, message = FALSE}
 unemp = read_csv(file = 
@@ -116,7 +112,7 @@ unemp = read_csv(file =
     select(year, month, everything())
 ```
 
-Next, I will fully join the datasets by merging `snp` into `pols` and merging `unemployment` into the result. I also chose to organize it so that `year`, `month`, and `president` appear before other variables.
+Lastly, I will fully join the datasets by merging `snp` into `pols` and merging `unemployment` into the result. I also chose to organize it so that `year`, `month`, and `president` appear before other variables.
 
 ```{r merge datasets, message = FALSE}
 pols_snp_unemp =
@@ -124,10 +120,8 @@ pols_snp_unemp =
   select(year, month, president, everything())
 ```
 
+These datasets (and the final `pols_snp_unemp` dataset) include information about unemployment rates, election results, and S&P 500 closing numbers. The `pols` dataset indicated the party affiliation - Democratic (`dem`) or Republican (`gop`) - of people in different political offices in months from April 1947 to March 1988, with `r nrow(pols)` rows and `r ncol(pols)` columns. The `snp` dataset showed closing values of the S&P 500 index from April 1950 to May 2015, with `r nrow(snp)` rows and `r ncol(snp)` columns. The `unemp` dataset contained unemployment rates per month from January 1948 to December 2015, `r nrow(unemp)` rows and `r ncol(unemp)` columns. Even though the date ranges of each dataset are not the same (some contain data for more time frames than others), the final datasets combines these datasets. The final dataset `pols_snp_unemp` contains `r nrow(pols_snp_unemp)` rows and `r ncol(pols_snp_unemp)` columns.
 
-##Insert paragraph here!!!
-
-#Date format?
 
 ## PROBLEM 3
 
@@ -136,8 +130,9 @@ First, I will load and tidy the data with the following in mind:
   * names of a categorical predictor and the case structure of string variables changed over time
   * some rows seem duplicated, so I removed using `distinct()`
 
-I removed duplicates first, because it was hard to tell whether counts within other corresponding values of ethnicity (i.e. `BLACK NON HISP` vs `BLACK NON HISPANIC`) were overlapping counts or separate counts. Thus, I removed duplicates before recoding corresponding values as the same value.
+After recoding, I removed duplicates because it looks like some of the same counts were recorded within other corresponding values of ethnicity (i.e. `BLACK NON HISP` vs `BLACK NON HISPANIC`) were overlapping counts or separate counts. Thus, I removed duplicates after recoding corresponding values as the same value.
 
+This code chunk tidies the data and creates two reader-friendly tables: One showing rankings of the name "Olivia" from 2011 - 2016 within different ethnicity categories, and one showing the most popular male baby names per year (in the same range) within each ethnicity category.
 
 ```{r olivia table, message = FALSE}
 baby_names = read_csv(file = "./data/Popular_Baby_Names.csv") %>% 
@@ -159,13 +154,6 @@ baby_names_olivia =
     values_from = "rank"
   )
 
-knitr::kable(baby_names_olivia, format = "html", caption = "Popularity of Olivia as a Female Baby Name")
-```
-
-Insert text
-
-
-```{r male baby names, message = FALSE}
 baby_names_male =
   filter(baby_names, gender == "male", rank == "1") %>% 
   select(-count, -rank, -gender) %>% 
@@ -173,12 +161,17 @@ baby_names_male =
     names_from = "year_of_birth",
     values_from = "childs_first_name"
   ) 
+```
+
+Below, I printed the two tables.
+
+```{r printing baby name tables, message = FALSE}
+knitr::kable(baby_names_olivia, format = "html", caption = "Popularity of Olivia as a Female Baby Name")
 
 knitr::kable(baby_names_male, format = "html", caption = "Most Popular Male Baby Names")
 ```
 
-
-Insert text
+Lastly, I created a scatterplot showing the rank in popularity of a name (x-axis) versus the count per name (y-axis) among white, male, non-hispanic children born in 2016.
 
 ```{r scatterplots, message = FALSE}
 scatter_male =
