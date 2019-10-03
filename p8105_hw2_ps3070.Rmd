@@ -172,9 +172,11 @@ baby_names_male =
 
 Below, I printed the two tables.
 
-```{r printing baby name tables, message = FALSE}
+```{r printing olivia, message = FALSE}
 knitr::kable(baby_names_olivia, format = "html", caption = "Popularity of Olivia as a Female Baby Name")
+```
 
+```{r printing male, message = FALSE}
 knitr::kable(baby_names_male, format = "html", caption = "Most Popular Male Baby Names")
 ```
 
