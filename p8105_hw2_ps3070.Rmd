@@ -23,15 +23,15 @@ To read and clean the Mr. Trash Wheel .xlsx file, I will:
 
 ```{r import trash wheel, message=FALSE}
 trashwheel = read_excel(
-  "./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+  "./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
   sheet = "Mr. Trash Wheel",
-  range = "A2:N338") %>%
+  range = "A2:N408") %>%
   janitor::clean_names() %>% 
   drop_na(dumpster) %>% 
   mutate(sports_balls = as.integer(round(sports_balls, digits = 0)))
 ```
 
-Only cells from A2 to N338 are imported because column O contains notes and row 1 only contains a figure and no data.
+Only cells from A2 to N408 are imported because column O contains notes and row 1 only contains a figure and no data.
 
 To clean up names of the data to snake case, I used `janitor::clean_names()`.
 
@@ -44,15 +44,15 @@ The 2018 precipitation data has empty rows, so I used `na.omit()` to avoid savin
 
 ```{r}
 precip_2017 = read_excel(
-  "./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
-  sheet = 4,
+  "./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+  sheet = 5,
   range = "A2:B14") %>% 
   janitor::clean_names() %>% 
   mutate(year = 2017)
 
 precip_2018 = read_excel(
-  "./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
-  sheet = 3,
+  "./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+  sheet = 4,
   range = "A2:B14") %>% 
   janitor::clean_names() %>% 
   mutate(year = 2018) %>% 
@@ -135,33 +135,55 @@ First, I will load and tidy the data with the following in mind:
 
 I removed duplicates first, because it was hard to tell whether counts within other corresponding values of ethnicity (i.e. `BLACK NON HISP` vs `BLACK NON HISPANIC`) were overlapping counts or separate counts. Thus, I removed duplicates before recoding corresponding values as the same value.
 
-```{r}
-baby = read_csv(file = 
-  "./data/Popular_Baby_Names.csv") %>% 
+##QUESTION: FOR MALE TABLE, DO WE NEED RANK NUMBERS LISTED IN TABLE FOR ONE SINGLE NAME, OR MOST POPULAR NAMES FOR EACH ETHNICITY AND YEAR LISTED IN TABLE?
+
+```{r olivia table, message = FALSE}
+baby_names = read_csv(file = "./data/Popular_Baby_Names.csv") %>% 
   janitor::clean_names() %>% 
-  distinct(.keep_all = FALSE) %>% 
   mutate(
     ethnicity = str_to_lower(ethnicity),
     gender = str_to_lower(gender),
     childs_first_name = str_to_lower(childs_first_name),
-    ethnicity = replace(ethnicity, ethnicity ==  "asian and paci", "asian and pacific islander"),
-    ethnicity = replace(ethnicity, ethnicity ==  "black non hisp", "black non hispanic"),
-    ethnicity = replace(ethnicity, ethnicity ==  "white non hisp", "white non hispanic")
-    ) %>% 
+    ethnicity = recode(ethnicity, "asian and paci" = "asian and pacific islander",
+                       "black non hisp" = "black non hispanic",
+                       "white non hisp" = "white non hispanic")) %>% 
   group_by(ethnicity) %>% 
-  mutate(
-    new_rank = rank(count)
-  ) %>% 
-  select(-rank) %>% 
-  
+  distinct(.keep_all = FALSE)
+
+baby_names_olivia =
+  filter(baby_names, childs_first_name == "olivia") %>% 
+  select(-count, -gender,-childs_first_name) %>% 
+  pivot_wider(names_from = "year_of_birth",
+    values_from = "rank"
+  )
+
+knitr::kable(baby_names_olivia, format = "pandoc", caption = "Popularity of Olivia as a Female Baby Name")
 ```
 
-```{r}
-  pivot_longer(starts_with("prez"),
-               values_to = "president") %>% 
-  select(-day, -name) %>% 
-  arrange(year, month) %>% 
-  select(year, month, everything())
+```{r male baby names, message = FALSE}
+baby_names_male =
+  filter(baby_names, gender == "male", rank == "1") %>% 
+  select(-count, -rank, -gender) %>% 
+  pivot_wider(
+    names_from = "year_of_birth",
+    values_from = "childs_first_name"
+  ) 
+
+knitr::kable(baby_names_male, format = "pandoc", caption = "Most Popular Male Baby Names")
 ```
 
-The column `rank` was initially populated based on count within each `ethnicity` category. However, some ethnicity values are named differently and were combined above. Because of this, a new rank column was created to show total rankings within each category.
+
+
+```{r scatterplots}
+male_scatter =
+  filter(baby_names, gender == "male",
+         ethnicity == "white non hispanic",
+         year_of_birth == "2016") %>% 
+  ggplot(aes(x = rank, y = count)) +
+  geom_point(aes(color = name)) + 
+  labs(
+    title = "Rank in Popularity of Male White Non-Hispanic Children Born in 2016",
+    x = "Rank",
+    y = "Count"
+  )
+```
